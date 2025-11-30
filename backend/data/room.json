@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "name": "general room",
+    "createdBy": "admin",
+    "createdAt": "2025-10-30T05:27:30.320Z"
+  },
+  {
+    "id": 2,
+    "name": "B.E chat room",
+    "createdBy": "testUser",
+    "createdAt": "2025-11-29T12:02:49.609Z"
+  }
+]
