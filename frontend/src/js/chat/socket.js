@@ -5,8 +5,10 @@ import { state } from "./state.js"; // make sure this exists
 
 export let socket;
 
+const BaseURL = ` https://samvaad-r7bw.onrender.com`;
+
 export function initSocket(token) {
-  socket = io("http://localhost:5000", {
+  socket = io(`${BaseURL}`, {
     auth: { token },
   });
 

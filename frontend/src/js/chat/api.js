@@ -1,6 +1,7 @@
 import { state } from "./state.js";
 
-const BASE = "http://localhost:5000";
+// const BASE = "http://localhost:5000";
+const BASE = ` https://samvaad-r7bw.onrender.com`;
 
 export async function fetchRooms() {
   const res = await fetch(`${BASE}/rooms`, {

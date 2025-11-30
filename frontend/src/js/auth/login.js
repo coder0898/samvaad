@@ -1,5 +1,7 @@
 import { isLoginFieldEmpty } from "./util.js";
 
+const BaseURL = ` https://samvaad-r7bw.onrender.com`;
+
 export function initLogin() {
   const loginForm = document.getElementById("loginForm");
   if (!loginForm) return;
@@ -11,7 +13,7 @@ export function initLogin() {
   async function sendLoginDetails(username, password) {
     try {
       console.log("Logging in with:", username, password);
-      const res = await fetch("http://localhost:5000/auth/login", {
+      const res = await fetch(`${BaseURL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),

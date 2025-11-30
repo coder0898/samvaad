@@ -5,6 +5,8 @@ import {
   isValidEmail,
 } from "./util.js";
 
+const BaseURL = ` https://samvaad-r7bw.onrender.com`;
+
 export function initSignup() {
   const signupForm = document.getElementById("signupForm");
   if (!signupForm) return;
@@ -19,7 +21,7 @@ export function initSignup() {
 
   async function sendSignupData(username, email, password) {
     try {
-      const res = await fetch("http://localhost:5000/auth/signup", {
+      const res = await fetch(`${BaseURL}/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, email, password }),
