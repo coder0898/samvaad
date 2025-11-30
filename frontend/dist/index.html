@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>chat_application_app</title>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css" />
+
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+      integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <script type="module" crossorigin src="/assets/index-A9g6TO_t.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-C0XaZcor.css">
+  </head>
+
+  <body
+    data-page="auth"
+    class="bg-light d-flex justify-content-center align-items-center min-vh-100"
+  >
+    <div class="container" style="max-width: 450px">
+      <div class="heading text-center mb-4">
+        <div class="icon mb-2">
+          <i class="fa-solid fa-headset fa-3x"></i>
+        </div>
+        <h1 class="fw-bold">Samvaad</h1>
+      </div>
+
+      <div class="content p-4 rounded shadow-sm bg-white">
+        <!-- Tabs -->
+        <div class="tab-button d-flex justify-content-around mb-4">
+          <button
+            class="tabs active btn btn-outline-primary w-50 me-2"
+            data-tab="1"
+          >
+            Login
+          </button>
+          <button class="tabs btn btn-outline-primary w-50" data-tab="2">
+            Signup
+          </button>
+        </div>
+
+        <!-- Login Form -->
+        <div class="form-content active" data-tab="1">
+          <p id="loginError" class="text-danger small"></p>
+
+          <form id="loginForm" autocomplete="on">
+            <div class="form-group mb-3">
+              <label class="form-label" for="loginUserName">User Name:</label>
+              <input
+                type="text"
+                id="loginUserName"
+                name="loginUserName"
+                class="form-control"
+                autocomplete="username"
+              />
+            </div>
+
+            <div class="form-group mb-3">
+              <label class="form-label" for="loginUserPassword"
+                >Password:</label
+              >
+              <input
+                type="password"
+                id="loginUserPassword"
+                name="loginUserPassword"
+                class="form-control"
+                autocomplete="current-password"
+              />
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">
+              Click to Login
+            </button>
+          </form>
+        </div>
+
+        <!-- Signup Form -->
+        <div class="form-content" data-tab="2">
+          <p id="signupError" class="text-danger small"></p>
+
+          <form id="signupForm" autocomplete="on">
+            <div class="form-group mb-3">
+              <label class="form-label" for="signupUserName">User Name:</label>
+              <input
+                type="text"
+                id="signupUserName"
+                name="signupUserName"
+                class="form-control"
+                autocomplete="username"
+              />
+            </div>
+
+            <div class="form-group mb-3">
+              <label class="form-label" for="userEmail">Email:</label>
+              <input
+                type="email"
+                id="userEmail"
+                name="userEmail"
+                class="form-control"
+                autocomplete="email"
+              />
+            </div>
+
+            <div class="form-group mb-3">
+              <label class="form-label" for="signupUserPassword"
+                >Password:</label
+              >
+              <input
+                type="password"
+                id="signupUserPassword"
+                name="signupUserPassword"
+                class="form-control"
+                autocomplete="new-password"
+              />
+            </div>
+
+            <div class="form-group mb-3">
+              <label class="form-label" for="signupConfirmPassword"
+                >Confirm Password:</label
+              >
+              <input
+                type="password"
+                id="signupConfirmPassword"
+                name="signupConfirmPassword"
+                class="form-control"
+                autocomplete="new-password"
+              />
+            </div>
+
+            <button type="submit" class="btn btn-success w-100">
+              Click to Sign up
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </body>
+</html>

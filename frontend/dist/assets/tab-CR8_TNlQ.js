@@ -1,0 +1,1 @@
+function o(){const e=document.querySelectorAll(".tab-button .tabs"),c=document.querySelectorAll(".form-content");e.forEach(a=>{a.addEventListener("click",()=>{const s=a.dataset.tab;e.forEach(t=>t.classList.remove("active")),a.classList.add("active"),c.forEach(t=>t.classList.remove("active")),c.forEach(t=>{t.dataset.tab===s&&t.classList.add("active")})})})}export{o as initTab};
