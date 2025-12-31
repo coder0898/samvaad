@@ -26,9 +26,20 @@ app.use("/chats", chatRoutes);
 
 // Socket setup
 const server = http.createServer(app);
+const allowedOrigins = [
+  process.env.CLIENT_URL_LOCAL,
+  process.env.CLIENT_URL_PROD,
+];
+
+// For Socket.IO
 const io = new Server(server, {
-  cors: { origin: process.env.CLIENT_URL || "*" },
+  cors: {
+    origin: allowedOrigins,
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
 });
+
 io.use(verifySocketToken);
 initSocket(io);
 
