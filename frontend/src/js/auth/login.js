@@ -1,6 +1,56 @@
+// import { isLoginFieldEmpty } from "./util.js";
+
+// const BaseURL = `https://samvaad-r7bw.onrender.com`;
+
+// export function initLogin() {
+//   const loginForm = document.getElementById("loginForm");
+//   if (!loginForm) return;
+
+//   const loginUserName = document.getElementById("loginUserName");
+//   const loginUserPassword = document.getElementById("loginUserPassword");
+//   const loginError = document.getElementById("loginError");
+
+//   async function sendLoginDetails(username, password) {
+//     try {
+//       console.log("Logging in with:", username, password);
+//       const res = await fetch(`${BaseURL}/auth/login`, {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({ username, password }),
+//       });
+//       const data = await res.json();
+
+//       if (!res.ok) {
+//         loginError.innerText = data.message || "Login failed";
+//         return;
+//       }
+
+//       localStorage.setItem("token", data.token);
+//       localStorage.setItem("user", JSON.stringify(data.user));
+//       window.location.href = "chat.html";
+//     } catch (err) {
+//       loginError.innerText = "Login error: " + err.message;
+//       console.error(err);
+//     }
+//   }
+
+//   loginForm.addEventListener("submit", (e) => {
+//     e.preventDefault();
+//     const username = loginUserName.value.trim();
+//     const password = loginUserPassword.value.trim();
+
+//     if (isLoginFieldEmpty(username, password)) {
+//       loginError.innerText = "Please enter both username and password";
+//       return;
+//     }
+
+//     sendLoginDetails(username, password);
+//   });
+// }
+
 import { isLoginFieldEmpty } from "./util.js";
 
-const BaseURL = ` https://samvaad-r7bw.onrender.com`;
+const BaseURL = `https://samvaad-r7bw.onrender.com`;
 
 export function initLogin() {
   const loginForm = document.getElementById("loginForm");
@@ -13,6 +63,7 @@ export function initLogin() {
   async function sendLoginDetails(username, password) {
     try {
       console.log("Logging in with:", username, password);
+
       const res = await fetch(`${BaseURL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -21,15 +72,26 @@ export function initLogin() {
       const data = await res.json();
 
       if (!res.ok) {
-        loginError.innerText = data.message || "Login failed";
+        if (loginError) loginError.innerText = data.message || "Login failed";
         return;
       }
 
+      // ✅ Save token & user in localStorage and state
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
-      window.location.href = "chat.html";
+
+      // ✅ SPA: switch page without reload
+      if (typeof window.showChatPage === "function") {
+        window.showChatPage();
+
+        // // ✅ Lazy load chat module dynamically
+        // const { initChat } = await import("../chat/chat.js");
+        // initChat();
+      } else {
+        console.warn("showChatPage() not found!");
+      }
     } catch (err) {
-      loginError.innerText = "Login error: " + err.message;
+      if (loginError) loginError.innerText = "Login error: " + err.message;
       console.error(err);
     }
   }
@@ -40,7 +102,8 @@ export function initLogin() {
     const password = loginUserPassword.value.trim();
 
     if (isLoginFieldEmpty(username, password)) {
-      loginError.innerText = "Please enter both username and password";
+      if (loginError)
+        loginError.innerText = "Please enter both username and password";
       return;
     }
 

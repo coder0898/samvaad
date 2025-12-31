@@ -4,9 +4,14 @@ import { setupUserEvents } from "./event/userEvent.js";
 import { initSocket } from "./socket.js";
 import { state } from "./state.js";
 
-export function initChat() {
-  initSocket(state.token);
+import { showView } from "./ui.js";
 
+export function initChat() {
+  if (!state.token) return;
+
+  showView("list"); // ✅ SHOW LIST FIRST
+
+  initSocket(state.token);
   loadRooms();
   setupRoomEvents();
   setupChatEvents();

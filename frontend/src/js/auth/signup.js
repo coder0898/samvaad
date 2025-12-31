@@ -5,7 +5,7 @@ import {
   isValidEmail,
 } from "./util.js";
 
-const BaseURL = ` https://samvaad-r7bw.onrender.com`;
+const BaseURL = `https://samvaad-r7bw.onrender.com`;
 
 export function initSignup() {
   const signupForm = document.getElementById("signupForm");

@@ -1,89 +1,203 @@
-// socket.js
+// import { io } from "socket.io-client";
+// import { UI, renderRooms, renderMessages } from "./ui.js";
+// import { state } from "./state.js";
+
+// export let socket;
+
+// const BaseURL = `https://samvaad-r7bw.onrender.com`;
+
+// export function initSocket(token) {
+//   if (!token) {
+//     console.warn("No token for socket connection!");
+//     return;
+//   }
+
+//   // Prevent multiple socket connections
+//   if (state.socketInitialized && socket) return;
+//   state.socketInitialized = true;
+
+//   socket = io(`${BaseURL}`, { auth: { token } });
+
+//   socket.on("connect", () => {
+//     console.log("🟢 Connected:", socket.id);
+//     socket.emit("getRooms");
+//   });
+
+//   socket.on("roomsList", (rooms) => {
+//     state.rooms = rooms;
+//     renderRooms(rooms);
+//   });
+
+//   socket.on("roomCreated", () => {
+//     socket.emit("getRooms");
+//   });
+
+//   // ✅ FIX: Do NOT render history if user left room
+//   socket.on("roomHistory", (messages) => {
+//     if (!state.currentRoomId) return; // 🔥 guard
+//     state.messages = messages;
+//     renderMessages(messages);
+//   });
+
+//   // ✅ FIX: Already guarded, KEEP IT
+//   socket.on("newMessage", (msg) => {
+//     if (!state.currentRoomId) return;
+//     if (msg.roomId !== state.currentRoomId) return;
+
+//     state.messages.push(msg);
+//     renderMessages(state.messages);
+//   });
+
+//   // ------------------ SPA SAFE EVENT LISTENERS ------------------
+
+//   const createRoomForm = UI.createRoomForm();
+//   const inputRoomName = UI.inputRoomName();
+
+//   if (createRoomForm && inputRoomName && !createRoomForm.dataset.listener) {
+//     createRoomForm.addEventListener("submit", (e) => {
+//       e.preventDefault();
+//       const roomName = inputRoomName.value.trim();
+//       if (!roomName) return;
+//       socket.emit("createRoom", { name: roomName });
+//       inputRoomName.value = "";
+//     });
+//     createRoomForm.dataset.listener = "true";
+//   }
+
+//   const messageForm = UI.messageForm();
+//   const messageInput = UI.messageInput();
+
+//   if (messageForm && messageInput && !messageForm.dataset.listener) {
+//     messageForm.addEventListener("submit", (e) => {
+//       e.preventDefault();
+//       if (!state.currentRoomId) return; // 🔥 guard
+//       const text = messageInput.value.trim();
+//       if (!text) return;
+//       socket.emit("sendMessage", { roomId: state.currentRoomId, text });
+//       messageInput.value = "";
+//     });
+//     messageForm.dataset.listener = "true";
+//   }
+// }
+
 import { io } from "socket.io-client";
 import { UI, renderRooms, renderMessages } from "./ui.js";
-import { state } from "./state.js"; // make sure this exists
+import { state } from "./state.js";
 
 export let socket;
-
-const BaseURL = ` https://samvaad-r7bw.onrender.com`;
+const BaseURL = `https://samvaad-r7bw.onrender.com`;
 
 export function initSocket(token) {
-  socket = io(`${BaseURL}`, {
-    auth: { token },
-  });
+  if (!token) {
+    console.warn("No token for socket connection!");
+    return;
+  }
+
+  // Prevent multiple socket connections
+  if (state.socketInitialized && socket) return;
+  state.socketInitialized = true;
+
+  socket = io(`${BaseURL}`, { auth: { token } });
 
   socket.on("connect", () => {
     console.log("🟢 Connected:", socket.id);
-    // Fetch rooms immediately
-    socket.emit("getRooms");
   });
 
-  // Rooms list
-  socket.on("roomsList", (rooms) => {
+  // ----------------- SOCKET EVENTS -----------------
+
+  // Listen for room updates
+  socket.on("refreshRooms", (rooms) => {
     state.rooms = rooms;
     renderRooms(rooms);
   });
 
-  // Room created
-  socket.on("roomCreated", (room) => {
-    console.log("Room created:", room);
-    socket.emit("getRooms"); // refresh rooms list
-  });
-
-  // Chat messages for a room
+  // Room chat history
   socket.on("roomHistory", (messages) => {
+    if (!state.currentRoomId) return; // guard
     state.messages = messages;
     renderMessages(messages);
   });
 
-  // New incoming message
+  // New chat message
   socket.on("newMessage", (msg) => {
+    if (!state.currentRoomId) return;
     if (msg.roomId !== state.currentRoomId) return;
+
     state.messages.push(msg);
     renderMessages(state.messages);
   });
 
-  // Handle create room form
-  if (UI.createRoomForm) {
-    UI.createRoomForm.addEventListener("submit", (e) => {
+  socket.on("disconnect", () => {
+    console.log("🔴 Disconnected:", socket.id);
+  });
+
+  // ----------------- UI EVENT LISTENERS -----------------
+
+  const createRoomForm = UI.createRoomForm();
+  const inputRoomName = UI.inputRoomName();
+
+  if (createRoomForm && inputRoomName && !createRoomForm.dataset.listener) {
+    createRoomForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const roomName = UI.inputRoomName.value.trim();
+      const roomName = inputRoomName.value.trim();
       if (!roomName) return;
 
-      socket.emit("createRoom", { name: roomName });
-      UI.inputRoomName.value = "";
+      try {
+        const res = await fetch(`${BaseURL}/rooms`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ name: roomName }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || "Failed to create room");
+
+        inputRoomName.value = "";
+        // UI will auto-update via refreshRooms
+      } catch (err) {
+        console.error(err.message);
+        alert(err.message);
+      }
     });
+    createRoomForm.dataset.listener = "true";
   }
 
-  // Handle sending a message
-  if (UI.messageForm) {
-    UI.messageForm.addEventListener("submit", (e) => {
+  const messageForm = UI.messageForm();
+  const messageInput = UI.messageInput();
+
+  if (messageForm && messageInput && !messageForm.dataset.listener) {
+    messageForm.addEventListener("submit", (e) => {
       e.preventDefault();
-      const text = UI.messageInput.value.trim();
-      if (!text || !state.currentRoomId) return;
+      if (!state.currentRoomId) return;
+      const text = messageInput.value.trim();
+      if (!text) return;
 
-      const msgData = {
-        roomId: state.currentRoomId,
-        text,
-      };
-
-      socket.emit("sendMessage", msgData);
-      UI.messageInput.value = "";
+      socket.emit("sendMessage", { roomId: state.currentRoomId, text });
+      messageInput.value = "";
     });
+    messageForm.dataset.listener = "true";
   }
+}
 
-  // Optional: handle clicking a room to join
-  if (UI.roomList) {
-    UI.roomList.addEventListener("click", (e) => {
-      const li = e.target.closest(".room-item");
-      if (!li) return;
+// ----------------- ROOM DELETE FUNCTION -----------------
+export async function deleteRoom(roomId) {
+  const token = localStorage.getItem("token");
+  if (!token) return;
 
-      const roomId = li.dataset.id;
-      state.currentRoomId = roomId;
-      UI.currentRoomName.textContent = li.textContent;
-
-      // Fetch room history
-      socket.emit("joinRoom", { roomId });
+  try {
+    const res = await fetch(`${BaseURL}/rooms/${roomId}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
     });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Failed to delete room");
+    // UI updates automatically via refreshRooms
+  } catch (err) {
+    console.error(err.message);
+    alert(err.message);
   }
 }

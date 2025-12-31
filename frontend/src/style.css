@@ -123,4 +123,10 @@ h1 {
   transform: scale(0.95);
 }
 
-/* i have chat application where fronend is vite+vanilla js and backend is express+nodejs with node file functionality to retain data, i want ot deploy usin gonrender please provide step and details to do int it to able to run my project locally and on live delpy */
+#authPage,#chatPage {
+  display: none;
+}
+
+#authPage.active,#chatPage.active {
+  display: block;
+}
