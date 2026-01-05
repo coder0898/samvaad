@@ -1,16 +1,16 @@
 import { state } from "./state.js";
 
-const BASE = `https://samvaad-r7bw.onrender.com`;
+const BaseURL = import.meta.env.VITE_BACKEND_URL;
 
 export async function fetchRooms() {
-  const res = await fetch(`${BASE}/rooms`, {
+  const res = await fetch(`${BaseURL}/rooms`, {
     headers: { Authorization: `Bearer ${state.token}` },
   });
   return await res.json();
 }
 
 export async function createRoom(name) {
-  const res = await fetch(`${BASE}/rooms`, {
+  const res = await fetch(`${BaseURL}/rooms`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -22,7 +22,7 @@ export async function createRoom(name) {
 }
 
 export async function deleteRoom(id) {
-  const res = await fetch(`${BASE}/rooms/${id}`, {
+  const res = await fetch(`${BaseURL}/rooms/${id}`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${state.token}` },
   });
@@ -30,7 +30,7 @@ export async function deleteRoom(id) {
 }
 
 export async function fetchProfile() {
-  const res = await fetch(`${BASE}/profile`, {
+  const res = await fetch(`${BaseURL}/profile`, {
     headers: { Authorization: `Bearer ${state.token}` },
   });
   return await res.json();

@@ -6,5 +6,7 @@ export const state = {
   currentRoomName: null,
   messages: [],
   hasJoined: false,
-  socketInitialized: false, // flag to prevent multiple socket connections
+  socketInitialized: false,
+  lastLeaveTime: null, // track when user leaves a room
+  listenersRegistered: false,
 };

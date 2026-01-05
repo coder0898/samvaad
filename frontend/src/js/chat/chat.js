@@ -9,11 +9,22 @@ import { showView } from "./ui.js";
 export function initChat() {
   if (!state.token) return;
 
-  showView("list"); // ✅ SHOW LIST FIRST
+  showView("list"); // show list first
 
-  initSocket(state.token);
-  loadRooms();
-  setupRoomEvents();
-  setupChatEvents();
-  setupUserEvents();
+  const socket = initSocket(state.token);
+
+  if (socket && !socket.connected) {
+    socket.on("connect", () => {
+      console.log("🟢 Socket connected, loading rooms...");
+      loadRooms(); // fetch initial rooms after connection
+      setupRoomEvents();
+      setupChatEvents();
+      setupUserEvents();
+    });
+  } else {
+    loadRooms();
+    setupRoomEvents();
+    setupChatEvents();
+    setupUserEvents();
+  }
 }

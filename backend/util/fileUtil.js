@@ -6,15 +6,15 @@ export function readData(filePath) {
     const raw = fs.readFileSync(filePath, "utf8");
     return raw ? JSON.parse(raw) : [];
   } catch (err) {
-    console.error("❌ Read file error:", err);
+    console.error(`❌ Read file error (${filePath}):`, err);
     return [];
   }
 }
 
 export function writeData(filePath, data) {
   try {
-    fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+    fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf8");
   } catch (err) {
-    console.error("❌ Write file error:", err);
+    console.error(`❌ Write file error (${filePath}):`, err);
   }
 }

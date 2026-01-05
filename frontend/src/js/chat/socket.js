@@ -1,9 +1,8 @@
 import { io } from "socket.io-client";
-import { UI, renderRooms, renderMessages } from "./ui.js";
 import { state } from "./state.js";
 
 export let socket;
-const BaseURL = `https://samvaad-r7bw.onrender.com`;
+const BaseURL = import.meta.env.VITE_BACKEND_URL;
 
 export function initSocket(token) {
   if (!token) {
@@ -11,111 +10,47 @@ export function initSocket(token) {
     return;
   }
 
-  // Prevent multiple socket connections
-  if (state.socketInitialized && socket) return;
-  state.socketInitialized = true;
+  if (socket) return socket;
 
-  socket = io(`${BaseURL}`, { auth: { token } });
-
-  socket.on("connect", () => {
-    console.log("🟢 Connected:", socket.id);
+  socket = io(BaseURL, {
+    auth: { token },
+    transports: ["websocket"],
   });
 
-  // ----------------- SOCKET EVENTS -----------------
+  // -------------------- SOCKET EVENTS --------------------
+  if (!state.listenersRegistered) {
+    state.listenersRegistered = true;
 
-  // Listen for room updates
-  socket.on("refreshRooms", (rooms) => {
-    state.rooms = rooms;
-    renderRooms(rooms);
-  });
+    socket.on("connect", () => {
+      console.log("🟢 Socket connected:", socket.id);
+    });
 
-  // Room chat history
-  socket.on("roomHistory", (messages) => {
-    if (!state.currentRoomId) return; // guard
-    state.messages = messages;
-    renderMessages(messages);
-  });
+    socket.on("disconnect", () => {
+      console.log("🔴 Socket disconnected");
+    });
 
-  // New chat message
-  socket.on("newMessage", (msg) => {
-    if (!state.currentRoomId) return;
-    if (msg.roomId !== state.currentRoomId) return;
+    socket.on("roomHistory", (messages) => {
+      if (!state.currentRoomId) return;
 
-    state.messages.push(msg);
-    renderMessages(state.messages);
-  });
-
-  socket.on("disconnect", () => {
-    console.log("🔴 Disconnected:", socket.id);
-  });
-
-  // ----------------- UI EVENT LISTENERS -----------------
-
-  const createRoomForm = UI.createRoomForm();
-  const inputRoomName = UI.inputRoomName();
-
-  if (createRoomForm && inputRoomName && !createRoomForm.dataset.listener) {
-    createRoomForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const roomName = inputRoomName.value.trim();
-      if (!roomName) return;
-
-      try {
-        const res = await fetch(`${BaseURL}/rooms`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ name: roomName }),
-        });
-
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || "Failed to create room");
-
-        inputRoomName.value = "";
-        // UI will auto-update via refreshRooms
-      } catch (err) {
-        console.error(err.message);
-        alert(err.message);
+      if (state.messages.length === 0) {
+        state.messages = messages || [];
+        document.dispatchEvent(
+          new CustomEvent("roomHistoryUpdated", { detail: state.messages })
+        );
+      } else {
+        console.log("🔹 Ignored old room history to start fresh.");
       }
     });
-    createRoomForm.dataset.listener = "true";
-  }
 
-  const messageForm = UI.messageForm();
-  const messageInput = UI.messageInput();
-
-  if (messageForm && messageInput && !messageForm.dataset.listener) {
-    messageForm.addEventListener("submit", (e) => {
-      e.preventDefault();
+    socket.on("newMessage", (msg) => {
       if (!state.currentRoomId) return;
-      const text = messageInput.value.trim();
-      if (!text) return;
+      if (msg.roomId.toString() !== state.currentRoomId.toString()) return;
 
-      socket.emit("sendMessage", { roomId: state.currentRoomId, text });
-      messageInput.value = "";
+      state.messages.push(msg);
+      document.dispatchEvent(
+        new CustomEvent("newMessageReceived", { detail: msg })
+      );
     });
-    messageForm.dataset.listener = "true";
-  }
-}
-
-// ----------------- ROOM DELETE FUNCTION -----------------
-export async function deleteRoom(roomId) {
-  const token = localStorage.getItem("token");
-  if (!token) return;
-
-  try {
-    const res = await fetch(`${BaseURL}/rooms/${roomId}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || "Failed to delete room");
-    // UI updates automatically via refreshRooms
-  } catch (err) {
-    console.error(err.message);
-    alert(err.message);
+    return socket;
   }
 }

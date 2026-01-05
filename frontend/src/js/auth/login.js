@@ -1,56 +1,9 @@
-// import { isLoginFieldEmpty } from "./util.js";
-
-// const BaseURL = `https://samvaad-r7bw.onrender.com`;
-
-// export function initLogin() {
-//   const loginForm = document.getElementById("loginForm");
-//   if (!loginForm) return;
-
-//   const loginUserName = document.getElementById("loginUserName");
-//   const loginUserPassword = document.getElementById("loginUserPassword");
-//   const loginError = document.getElementById("loginError");
-
-//   async function sendLoginDetails(username, password) {
-//     try {
-//       console.log("Logging in with:", username, password);
-//       const res = await fetch(`${BaseURL}/auth/login`, {
-//         method: "POST",
-//         headers: { "Content-Type": "application/json" },
-//         body: JSON.stringify({ username, password }),
-//       });
-//       const data = await res.json();
-
-//       if (!res.ok) {
-//         loginError.innerText = data.message || "Login failed";
-//         return;
-//       }
-
-//       localStorage.setItem("token", data.token);
-//       localStorage.setItem("user", JSON.stringify(data.user));
-//       window.location.href = "chat.html";
-//     } catch (err) {
-//       loginError.innerText = "Login error: " + err.message;
-//       console.error(err);
-//     }
-//   }
-
-//   loginForm.addEventListener("submit", (e) => {
-//     e.preventDefault();
-//     const username = loginUserName.value.trim();
-//     const password = loginUserPassword.value.trim();
-
-//     if (isLoginFieldEmpty(username, password)) {
-//       loginError.innerText = "Please enter both username and password";
-//       return;
-//     }
-
-//     sendLoginDetails(username, password);
-//   });
-// }
-
+// login.js
 import { isLoginFieldEmpty } from "./util.js";
 
 const BaseURL = `https://samvaad-r7bw.onrender.com`;
+
+let loginErrorTimeout; // global timeout tracker
 
 export function initLogin() {
   const loginForm = document.getElementById("loginForm");
@@ -58,8 +11,27 @@ export function initLogin() {
 
   const loginUserName = document.getElementById("loginUserName");
   const loginUserPassword = document.getElementById("loginUserPassword");
-  const loginError = document.getElementById("loginError");
 
+  // ----------------- HELPER: SHOW LOGIN ERROR -----------------
+  function showLoginError(msg) {
+    const loginError = document.getElementById("loginError");
+    if (!loginError) return;
+
+    loginError.innerText = msg;
+
+    // clear previous timeout if exists
+    if (loginErrorTimeout) clearTimeout(loginErrorTimeout);
+
+    // clear inputs & error after 3 seconds
+    loginErrorTimeout = setTimeout(() => {
+      loginUserName.value = "";
+      loginUserPassword.value = "";
+      loginError.innerText = "";
+      loginErrorTimeout = null;
+    }, 3000);
+  }
+
+  // ----------------- SEND LOGIN REQUEST -----------------
   async function sendLoginDetails(username, password) {
     try {
       console.log("Logging in with:", username, password);
@@ -69,41 +41,49 @@ export function initLogin() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
       });
+
       const data = await res.json();
 
       if (!res.ok) {
-        if (loginError) loginError.innerText = data.message || "Login failed";
+        showLoginError(data.message || "Login failed");
         return;
       }
 
-      // ✅ Save token & user in localStorage and state
+      // ✅ Save token & user in localStorage
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
 
-      // ✅ SPA: switch page without reload
+      // ✅ SPA: show chat page
       if (typeof window.showChatPage === "function") {
         window.showChatPage();
 
-        // // ✅ Lazy load chat module dynamically
-        // const { initChat } = await import("../chat/chat.js");
-        // initChat();
+        // ✅ Lazy-load chat module only once
+        if (typeof window.startChatApp === "function") {
+          await window.startChatApp();
+        } else {
+          console.warn("startChatApp() not found!");
+        }
       } else {
         console.warn("showChatPage() not found!");
       }
+
+      loginUserName.value = "";
+      loginUserPassword.value = "";
     } catch (err) {
-      if (loginError) loginError.innerText = "Login error: " + err.message;
+      showLoginError("Login error: " + err.message);
       console.error(err);
     }
   }
 
+  // ----------------- FORM SUBMIT -----------------
   loginForm.addEventListener("submit", (e) => {
     e.preventDefault();
+
     const username = loginUserName.value.trim();
     const password = loginUserPassword.value.trim();
 
     if (isLoginFieldEmpty(username, password)) {
-      if (loginError)
-        loginError.innerText = "Please enter both username and password";
+      showLoginError("Please enter both username and password");
       return;
     }
 

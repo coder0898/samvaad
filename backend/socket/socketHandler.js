@@ -1,147 +1,99 @@
-// import { saveMessage, readRoomMessages } from "../util/chatStore.js";
-
-// export default function initSocket(io) {
-//   const memoryCache = {};
-
-//   io.on("connection", (socket) => {
-//     console.log(`🟢 Connected: ${socket.id} (${socket.user.username})`);
-
-//     // Join Room
-//     socket.on("joinRoom", ({ roomId }) => {
-//       socket.join(roomId);
-
-//       if (!memoryCache[roomId]) memoryCache[roomId] = readRoomMessages(roomId);
-
-//       socket.emit("roomHistory", memoryCache[roomId]);
-
-//       const joinMsg = {
-//         roomId,
-//         username: "System",
-//         text: `${socket.user.username} joined the room`,
-//         time: new Date().toISOString(),
-//       };
-
-//       memoryCache[roomId].push(joinMsg);
-//       saveMessage(roomId, joinMsg);
-//       io.to(roomId).emit("newMessage", joinMsg);
-//     });
-
-//     // Send Message
-//     socket.on("sendMessage", ({ roomId, text }) => {
-//       const msg = {
-//         roomId,
-//         username: socket.user.username,
-//         text,
-//         time: new Date().toISOString(),
-//       };
-
-//       if (!memoryCache[roomId]) memoryCache[roomId] = [];
-//       memoryCache[roomId].push(msg);
-//       saveMessage(roomId, msg);
-
-//       io.to(roomId).emit("newMessage", msg);
-//     });
-
-//     // Leave Room
-//     socket.on("leaveRoom", ({ roomId }) => {
-//       socket.leave(roomId);
-
-//       const leaveMsg = {
-//         roomId,
-//         username: "System",
-//         text: `${socket.user.username} left the room`,
-//         time: new Date().toISOString(),
-//       };
-
-//       if (!memoryCache[roomId]) memoryCache[roomId] = [];
-//       memoryCache[roomId].push(leaveMsg);
-//       saveMessage(roomId, leaveMsg);
-
-//       io.to(roomId).emit("newMessage", leaveMsg);
-//     });
-
-//     socket.on("disconnect", () => {
-//       console.log(`🔴 Disconnected: ${socket.id}`);
-//     });
-//   });
-// }
-
 import { saveMessage, readRoomMessages } from "../util/chatStore.js";
 
 export default function initSocket(io) {
+  // In-memory cache per roomId (string)
   const memoryCache = {};
 
   io.on("connection", (socket) => {
     console.log(`🟢 Connected: ${socket.id} (${socket.user.username})`);
 
-    // Join Room
+    /**
+     * JOIN ROOM
+     */
+
     socket.on("joinRoom", ({ roomId }) => {
-      // If room was deleted, prevent joining
-      if (!memoryCache[roomId]) {
-        memoryCache[roomId] = readRoomMessages(roomId) || [];
-      }
+      if (!roomId) return;
 
-      socket.join(roomId);
+      const rid = String(roomId);
 
-      socket.emit("roomHistory", memoryCache[roomId]);
+      socket.join(rid);
 
+      // SEND EMPTY HISTORY to frontend
+      socket.emit("roomHistory", []);
+
+      // Add join message (optional)
       const joinMsg = {
-        roomId,
+        roomId: rid,
         username: "System",
         text: `${socket.user.username} joined the room`,
         time: new Date().toISOString(),
       };
 
-      memoryCache[roomId].push(joinMsg);
-      saveMessage(roomId, joinMsg);
-      io.to(roomId).emit("newMessage", joinMsg);
+      // Store it in memory only if you want current session messages
+      if (!memoryCache[rid]) memoryCache[rid] = [];
+      memoryCache[rid].push(joinMsg);
+
+      socket.to(rid).emit("newMessage", joinMsg);
     });
 
-    // Send Message
+    /**
+     * SEND MESSAGE
+     */
     socket.on("sendMessage", ({ roomId, text }) => {
-      if (!memoryCache[roomId]) memoryCache[roomId] = [];
+      if (!roomId || !text) return;
+
+      const rid = String(roomId);
+
+      if (!memoryCache[rid]) {
+        memoryCache[rid] = readRoomMessages(rid) || [];
+      }
 
       const msg = {
-        roomId,
+        roomId: rid,
         username: socket.user.username,
         text,
         time: new Date().toISOString(),
       };
 
-      memoryCache[roomId].push(msg);
-      saveMessage(roomId, msg);
+      memoryCache[rid].push(msg);
+      saveMessage(rid, msg);
 
-      io.to(roomId).emit("newMessage", msg);
+      io.to(rid).emit("newMessage", msg);
     });
 
-    // Leave Room
+    /**
+     * LEAVE ROOM
+     */
+
     socket.on("leaveRoom", ({ roomId }) => {
-      socket.leave(roomId);
+      if (!roomId) return;
+
+      const rid = String(roomId);
+      socket.leave(rid);
 
       const leaveMsg = {
-        roomId,
+        roomId: rid,
         username: "System",
         text: `${socket.user.username} left the room`,
         time: new Date().toISOString(),
       };
 
-      if (!memoryCache[roomId]) memoryCache[roomId] = [];
-      memoryCache[roomId].push(leaveMsg);
-      saveMessage(roomId, leaveMsg);
+      // Push leave message to memory for current session
+      if (!memoryCache[rid]) memoryCache[rid] = [];
+      memoryCache[rid].push(leaveMsg);
 
-      io.to(roomId).emit("newMessage", leaveMsg);
+      socket.to(rid).emit("newMessage", leaveMsg);
+
+      // Optional: if room empty, clear memory cache
+      const clients = io.sockets.adapter.rooms.get(rid);
+      if (!clients || clients.size === 0) {
+        memoryCache[rid] = [];
+      }
     });
 
-    // Optional: Clean up memoryCache when rooms are deleted
-    socket.on("refreshRooms", (rooms) => {
-      const existingRoomIds = rooms.map((r) => r.id.toString());
-      Object.keys(memoryCache).forEach((roomId) => {
-        if (!existingRoomIds.includes(roomId)) {
-          delete memoryCache[roomId]; // remove deleted room from memory
-        }
-      });
-    });
-
+    /**
+     * DISCONNECT
+     */
     socket.on("disconnect", () => {
       console.log(`🔴 Disconnected: ${socket.id}`);
     });

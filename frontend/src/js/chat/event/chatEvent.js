@@ -3,9 +3,9 @@ import { socket } from "../socket.js";
 import { UI } from "../ui.js";
 
 export function setupChatEvents() {
+  // ---------------- MESSAGE FORM ----------------
   const messageForm = UI.messageForm();
   const messageInput = UI.messageInput();
-  const msgList = UI.msgList();
 
   if (messageForm && !messageForm.dataset.listener) {
     messageForm.addEventListener("submit", (e) => {
@@ -19,28 +19,31 @@ export function setupChatEvents() {
     messageForm.dataset.listener = "true";
   }
 
+  // ---------------- NEW MESSAGE ----------------
   socket.off("newMessage").on("newMessage", (msg) => {
-    if (msg.roomId !== state.currentRoomId) return;
-    appendMessage(msg);
+    if (msg.roomId.toString() !== state.currentRoomId.toString()) return;
+    const msgList = UI.msgList();
+    appendMessage(msg, msgList);
   });
 
-  // socket.off("roomHistory").on("roomHistory", (messages) => {
-  //   if (!msgList) return;
-  //   msgList.innerHTML = "";
-  //   messages.forEach(appendMessage);
-  //   msgList.scrollTop = msgList.scrollHeight;
-  // });
-
+  // ---------------- ROOM HISTORY ----------------
   socket.off("roomHistory").on("roomHistory", (messages) => {
     const msgList = UI.msgList();
-    if (!msgList || !state.currentRoomId) return; // 🔥 guard
+    if (!msgList || !state.currentRoomId) return;
+
     msgList.innerHTML = "";
-    messages.forEach(appendMessage);
+    messages.forEach((msg) => {
+      if (msg.roomId.toString() === state.currentRoomId.toString()) {
+        appendMessage(msg, msgList);
+      }
+    });
     msgList.scrollTop = msgList.scrollHeight;
   });
 
-  function appendMessage(msg) {
+  // ---------------- HELPER ----------------
+  function appendMessage(msg, msgList) {
     if (!msgList) return;
+
     const li = document.createElement("li");
     li.className = "message-item";
     if (msg.username === "System") li.classList.add("system-message");
@@ -48,13 +51,18 @@ export function setupChatEvents() {
     li.innerHTML = `
       <div class="msg-head" style="display:flex; justify-content: space-between; font-size:0.85rem; color:gray;">
         <span>${msg.username}</span>
-        <span>${new Date(msg.time).toLocaleTimeString()}</span>
+        <span>${new Date(msg.time).toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        })}</span>
       </div>
       <div class="msg-text" style="font-size:1.1rem; margin-top:2px;">
         ${msg.text}
       </div>
     `;
+
     msgList.appendChild(li);
     msgList.scrollTop = msgList.scrollHeight;
+    console.log("Registering message listener");
   }
 }

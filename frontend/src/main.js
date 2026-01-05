@@ -1,7 +1,14 @@
-// main.js
-// import "./style.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap/dist/js/bootstrap.bundle.min.js";
+
+let chatInitialized = false;
+
+window.startChatApp = async function () {
+  if (chatInitialized) return;
+
+  const { initChat } = await import("./js/chat/chat.js");
+  initChat();
+  chatInitialized = true;
+};
 
 // -------------------- PAGE ELEMENTS --------------------
 function getPages() {
@@ -41,6 +48,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   const token = localStorage.getItem("token");
   if (token) {
     showChatPage();
+    await window.startChatApp();
   } else {
     showAuthPage();
   }
@@ -53,10 +61,4 @@ window.addEventListener("DOMContentLoaded", async () => {
   initTab();
   initSignup();
   initLogin();
-
-  // -------------------- LAZY LOAD CHAT MODULE --------------------
-  if (token) {
-    const { initChat } = await import("./js/chat/chat.js");
-    initChat();
-  }
 });

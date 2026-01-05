@@ -13,7 +13,7 @@ export function setupUserEvents() {
   const confirmPopup = UI.confirmPopup();
   const popupText = UI.popupText();
 
-  // Profile button
+  // ---------------- PROFILE BUTTON ----------------
   if (profileBtn) {
     profileBtn.addEventListener("click", async () => {
       const data = await fetchProfile();
@@ -26,7 +26,7 @@ export function setupUserEvents() {
     });
   }
 
-  // Logout button
+  // ---------------- LOGOUT BUTTON ----------------
   if (logoutBtn) {
     logoutBtn.addEventListener("click", () => {
       localStorage.clear();
@@ -35,11 +35,12 @@ export function setupUserEvents() {
       state.currentRoomId = null;
       state.currentRoomName = null;
       state.messages = [];
+      state.hasJoined = false;
 
       UI.chatSection().style.display = "none";
       UI.chatList().style.display = "none";
       UI.profileSection().style.display = "none";
-      UI.msgList().innerHTML = "";
+      if (UI.msgList()) UI.msgList().innerHTML = "";
       if (UI.currentRoomName()) UI.currentRoomName().textContent = "";
 
       if (typeof window.showAuthPage === "function") {
@@ -48,7 +49,7 @@ export function setupUserEvents() {
     });
   }
 
-  // Back button in profile
+  // ---------------- BACK BUTTON IN PROFILE ----------------
   if (backBtn) {
     backBtn.addEventListener("click", () => {
       UI.profileSection().style.display = "none";
@@ -57,7 +58,7 @@ export function setupUserEvents() {
     });
   }
 
-  // Confirm popup Yes/No
+  // ---------------- CONFIRM POPUP YES ----------------
   if (confirmYes) {
     confirmYes.addEventListener("click", () => {
       const action = confirmPopup.dataset.action;
@@ -68,53 +69,65 @@ export function setupUserEvents() {
     });
   }
 
+  // ---------------- CONFIRM POPUP NO ----------------
   if (confirmNo) {
     confirmNo.addEventListener("click", () => {
       confirmPopup.style.display = "none";
     });
   }
 
-  // Leave room button inside chat
+  // ---------------- LEAVE ROOM BUTTON ----------------
   if (chatBackBtn) {
     chatBackBtn.addEventListener("click", () => {
-      popupText.textContent = "Leave this room?";
+      popupText.textContent = "Do you want to leave this room?";
       confirmPopup.dataset.action = "leave";
       confirmPopup.style.display = "flex";
     });
   }
 }
 
-// Join Room
+// ---------------- JOIN ROOM ----------------
+
 function joinRoom(id, name) {
-  state.currentRoomId = id;
+  const roomId = id.toString(); // always string
+
+  state.currentRoomId = roomId;
   state.currentRoomName = name;
-  state.messages = [];
+  state.messages = []; // clear previous messages
   state.hasJoined = true;
 
+  // Clear UI messages
   const msgList = UI.msgList();
   if (msgList) msgList.innerHTML = "";
-  UI.currentRoomName().textContent = `Room: ${name}`;
+  if (UI.currentRoomName()) UI.currentRoomName().textContent = `Room: ${name}`;
 
-  document.querySelector(".list-section")?.style.setProperty("display", "none");
-  UI.chatSection().style.setProperty("display", "flex");
+  UI.listSection()?.style.setProperty("display", "none");
+  UI.chatSection()?.style.setProperty("display", "flex");
 
-  socket.emit("joinRoom", { roomId: id });
+  if (socket && socket.connected) {
+    console.log("Joining room:", roomId, name);
+    socket.emit("joinRoom", { roomId }); // notify backend
+  } else {
+    console.warn("Socket not connected yet. Messages may not load.");
+  }
 }
 
-// Leave Room
+// ---------------- LEAVE ROOM ----------------
+
 function leaveRoom() {
-  if (state.currentRoomId) {
+  if (state.currentRoomId && socket && socket.connected) {
     socket.emit("leaveRoom", { roomId: state.currentRoomId });
   }
 
+  // Clear state and UI
   state.currentRoomId = null;
   state.currentRoomName = null;
-  state.messages = [];
+  state.messages = []; // clear old messages
   state.hasJoined = false;
 
   const msgList = UI.msgList();
   if (msgList) msgList.innerHTML = "";
 
-  document.querySelector(".list-section")?.style.setProperty("display", "flex");
-  UI.chatSection().style.setProperty("display", "none");
+  UI.listSection()?.style.setProperty("display", "flex");
+  UI.chatSection()?.style.setProperty("display", "none");
 }

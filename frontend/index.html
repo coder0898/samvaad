@@ -2,210 +2,276 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Samvaad - Chat Application</title>
+    <link rel="stylesheet" href="./css/style.css" />
 
-    <!-- Auth CSS -->
-    <link rel="stylesheet" href="/css/style.css" />
-
-    <!-- Chat CSS -->
-    <link rel="stylesheet" href="/css/chat.css" />
+    <!-- Bootstrap -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
 
     <!-- Font Awesome -->
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
     />
+
+    <!-- Google Font -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
     <style>
-      /* SPA page toggling */
       .page {
-        display: none !important; /* hide by default */
+        display: none !important;
       }
       .page.active {
-        display: block !important; /* show active page */
+        display: block !important;
       }
     </style>
   </head>
 
-  <body data-page="auth">
+  <body data-page="auth" style="font-family: Poppins">
     <!-- ================= AUTH PAGE ================= -->
-    <section id="authPage">
-      <div class="container" style="max-width: 450px">
-        <div class="heading text-center mb-4">
-          <div class="icon mb-2">
-            <i class="fa-solid fa-headset fa-3x"></i>
-          </div>
-          <h1 class="fw-bold">Samvaad</h1>
-        </div>
+    <section id="authPage" class="active w-100">
+      <div class="container-sm">
+        <div class="card shadow-sm rounded-4 mx-auto" style="max-width: 450px">
+          <div class="card-body p-4">
+            <div class="text-center mb-4">
+              <i class="fa-solid fa-headset fa-3x text-success mb-2"></i>
+              <h1 class="fw-bold">Samvaad</h1>
+            </div>
 
-        <div class="content p-4 rounded shadow-sm bg-white">
-          <!-- Tabs -->
-          <div class="tab-button d-flex justify-content-around mb-4">
-            <button
-              class="tabs active btn btn-outline-primary w-50 me-2"
-              data-tab="1"
-            >
-              Login
-            </button>
-            <button class="tabs btn btn-outline-primary w-50" data-tab="2">
-              Signup
-            </button>
-          </div>
-
-          <!-- Login Form -->
-          <div class="form-content active" data-tab="1">
-            <p id="loginError" class="text-danger small"></p>
-
-            <form id="loginForm">
-              <div class="form-group mb-3">
-                <label for="loginUserName">User Name:</label>
-                <input type="text" id="loginUserName" class="form-control" />
-              </div>
-
-              <div class="form-group mb-3">
-                <label for="loginUserPassword">Password:</label>
-                <input
-                  type="password"
-                  id="loginUserPassword"
-                  class="form-control"
-                />
-              </div>
-
-              <button type="submit" class="btn btn-primary w-100">
-                Click to Login
+            <div class="tab-button d-flex gap-2 mb-4">
+              <button
+                class="tabs btn btn-outline-success w-50 active"
+                data-tab="1"
+              >
+                Login
               </button>
-            </form>
-          </div>
-
-          <!-- Signup Form -->
-          <div class="form-content" data-tab="2">
-            <p id="signupError" class="text-danger small"></p>
-
-            <form id="signupForm">
-              <input
-                type="text"
-                id="signupUserName"
-                placeholder="Username"
-                class="form-control mb-2"
-              />
-              <input
-                type="email"
-                id="userEmail"
-                placeholder="Email"
-                class="form-control mb-2"
-              />
-              <input
-                type="password"
-                id="signupUserPassword"
-                placeholder="Password"
-                class="form-control mb-2"
-              />
-              <input
-                type="password"
-                id="signupConfirmPassword"
-                placeholder="Confirm Password"
-                class="form-control mb-3"
-              />
-              <button type="submit" class="btn btn-success w-100">
-                Click to Sign up
+              <button class="tabs btn btn-outline-success w-50" data-tab="2">
+                Signup
               </button>
-            </form>
+            </div>
+
+            <!-- Login -->
+            <div class="form-content active" data-tab="1">
+              <p id="loginError" class="text-danger small"></p>
+
+              <form id="loginForm">
+                <div class="form-floating mb-3">
+                  <input
+                    id="loginUserName"
+                    class="form-control"
+                    placeholder="User Name"
+                    autocomplete="username"
+                  />
+                  <label for="loginUserName">User Name</label>
+                </div>
+
+                <div class="form-floating mb-3">
+                  <input
+                    type="password"
+                    id="loginUserPassword"
+                    class="form-control"
+                    placeholder="Password"
+                    autocomplete="current-password"
+                  />
+                  <label for="loginUserPassword">Password</label>
+                </div>
+
+                <button class="btn btn-success w-100 fw-semibold">
+                  Click to Login
+                </button>
+              </form>
+            </div>
+
+            <!-- Signup -->
+            <div class="form-content" data-tab="2">
+              <p id="signupError" class="text-danger small"></p>
+
+              <form id="signupForm">
+                <div class="form-floating mb-3">
+                  <input
+                    id="signupUserName"
+                    class="form-control"
+                    placeholder="Username"
+                    autocomplete="username"
+                  />
+                  <label for="signupUserName">User Name</label>
+                </div>
+
+                <div class="form-floating mb-3">
+                  <input
+                    id="userEmail"
+                    class="form-control"
+                    placeholder="Email"
+                    autocomplete="email"
+                  />
+                  <label for="userEmail">Email</label>
+                </div>
+
+                <div class="form-floating mb-3">
+                  <input
+                    type="password"
+                    id="signupUserPassword"
+                    class="form-control"
+                    placeholder="Password"
+                    autocomplete="new-password"
+                  />
+                  <label for="signupUserPassword">Password</label>
+                </div>
+
+                <div class="form-floating mb-3">
+                  <input
+                    type="password"
+                    id="signupConfirmPassword"
+                    class="form-control"
+                    placeholder="Confirm Password"
+                    autocomplete="new-password"
+                  />
+                  <label for="signupConfirmPassword">Confirm Password</label>
+                </div>
+
+                <button class="btn btn-success w-100 fw-semibold">
+                  Click to Sign up
+                </button>
+              </form>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
     <!-- ================= CHAT PAGE ================= -->
-    <section id="chatPage">
-      <div class="chat-container">
-        <main>
-          <section class="list-section">
-            <header>
-              <div class="logo">
-                <div class="icon"><i class="fa-solid fa-headset"></i></div>
-                <h2>Samvaad</h2>
-              </div>
-              <button class="profile-btn" id="profileBtn">
-                <i class="fa-solid fa-user"></i>
-              </button>
-            </header>
-
-            <aside class="profile-section">
-              <div class="avatar-div">
-                <span><i class="fa-solid fa-user"></i></span>
-              </div>
-              <div class="profile-box">
-                <h2 id="profileUser">username</h2>
-                <p id="profileMail">email</p>
-                <div class="button-group">
-                  <button class="back-btn" id="backBtn">
-                    <i class="fa-solid fa-arrow-left"></i> Back
-                  </button>
-                  <button class="out-btn" id="logoutBtn">
-                    <i class="fa-solid fa-right-from-bracket"></i> Logout
-                  </button>
-                </div>
-              </div>
-            </aside>
-
-            <aside class="chat-list">
-              <h3>Available Rooms</h3>
-              <ul class="room-list" id="roomList">
-                <li id="loadingRooms">Loading rooms...</li>
-              </ul>
-            </aside>
-
-            <form id="create-room-form">
-              <input
-                type="text"
-                id="inputRoomName"
-                placeholder="New room name"
-                required
-              />
-              <button type="submit"><i class="fa-solid fa-plus"></i></button>
-            </form>
-          </section>
-
-          <section class="chat-section">
-            <div class="chat-header">
-              <h3 id="current-room-name">Room: General</h3>
-              <button id="chatBackBtn">Leave room</button>
+    <section id="chatPage" class="w-100 vh-100">
+      <div
+        class="chat-container bg-white border rounded-4 w-100 h-100 d-flex flex-column overflow-hidden"
+        style="max-width: 500px"
+      >
+        <!-- LIST SECTION -->
+        <section
+          class="list-section d-flex flex-column flex-grow-1 overflow-hidden"
+        >
+          <header
+            class="d-flex justify-content-between align-items-center p-3 bg-success text-white rounded-top-4"
+          >
+            <div class="d-flex align-items-center gap-2">
+              <i class="fa-solid fa-headset fs-4"></i>
+              <h2 class="h5 mb-0 fw-semibold">Samvaad</h2>
             </div>
 
-            <div class="chat-messages">
-              <ul class="message-list" id="msgList"></ul>
+            <button
+              id="profileBtn"
+              class="btn btn-light rounded-circle d-flex align-items-center justify-content-center"
+              style="width: 42px; height: 42px"
+            >
+              <i class="fa-solid fa-user text-success"></i>
+            </button>
+          </header>
+
+          <!-- PROFILE -->
+          <aside class="profile-section flex-column p-4 bg-light h-100">
+            <div class="d-flex justify-content-center py-4">
+              <span
+                class="rounded-circle bg-white shadow d-flex justify-content-center align-items-center"
+                style="width: 250px; height: 250px; font-size: 8rem"
+              >
+                <i class="fa-solid fa-user text-success"></i>
+              </span>
             </div>
 
-            <form id="message-form" class="message-form">
-              <input
-                type="text"
-                id="message-input"
-                placeholder="Type your message..."
-                autocomplete="off"
-                required
-              />
-              <button type="submit">
-                <i class="fa-solid fa-paper-plane"></i>
-              </button>
-            </form>
-          </section>
+            <div class="bg-white rounded-4 shadow-sm p-3">
+              <h2 id="profileUser" class="h5 border-bottom pb-1">username</h2>
+              <p id="profileMail" class="border-bottom pb-1">email</p>
 
-          <!-- Confirmation Popup -->
-          <div class="popup" id="confirmPopup">
-            <div class="popup-content">
-              <p id="popupText">Are you sure?</p>
-              <div class="button-group">
-                <button id="confirmYes">Yes</button>
-                <button id="confirmNo">No</button>
+              <div class="d-flex justify-content-between mt-3">
+                <button id="backBtn" class="btn btn-success px-4 rounded-4">
+                  <i class="fa-solid fa-arrow-left me-1"></i> Back
+                </button>
+                <button id="logoutBtn" class="btn btn-danger px-4 rounded-4">
+                  <i class="fa-solid fa-right-from-bracket me-1"></i> Logout
+                </button>
               </div>
+            </div>
+          </aside>
+
+          <!-- CHAT LIST -->
+          <aside class="chat-list bg-light flex-grow-1 overflow-hidden">
+            <h3 class="fs-6 fw-medium p-3">Available Rooms</h3>
+            <ul
+              id="roomList"
+              class="room-list list-unstyled d-flex flex-column gap-3 px-3 pb-3 overflow-auto h-100"
+            >
+              <li id="loadingRooms">Loading rooms...</li>
+            </ul>
+          </aside>
+
+          <form id="create-room-form" class="p-3 bg-success d-flex gap-2">
+            <input
+              id="inputRoomName"
+              class="form-control"
+              placeholder="New room name"
+              required
+            />
+            <button class="btn btn-light text-success">
+              <i class="fa-solid fa-plus"></i>
+            </button>
+          </form>
+        </section>
+
+        <!-- CHAT SECTION -->
+        <section class="chat-section flex-column flex-grow-1">
+          <div
+            class="d-flex justify-content-between align-items-center p-3 bg-success text-white rounded-top-4"
+          >
+            <h3 id="current-room-name" class="fs-5 mb-0">Room: General</h3>
+            <button id="chatBackBtn" class="btn btn-light text-success">
+              Leave room
+            </button>
+          </div>
+
+          <div class="chat-messages flex-grow-1 p-3 overflow-hidden">
+            <ul
+              id="msgList"
+              class="message-list list-unstyled d-flex flex-column gap-3 h-100 overflow-auto px-3 pb-3"
+            ></ul>
+          </div>
+
+          <form id="message-form" class="p-3 bg-success d-flex gap-2">
+            <input
+              id="message-input"
+              class="form-control"
+              placeholder="Type your message..."
+              required
+            />
+            <button class="btn btn-light text-success">
+              <i class="fa-solid fa-paper-plane"></i>
+            </button>
+          </form>
+        </section>
+
+        <!-- POPUP -->
+        <div
+          id="confirmPopup"
+          class="popup position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 justify-content-center align-items-center"
+          role="dialog"
+          tabindex="-1"
+        >
+          <div class="popup-content bg-white rounded-3 p-4 text-center shadow">
+            <p id="popupText">Are you sure?</p>
+            <div class="button-group d-flex justify-content-evenly">
+              <button id="confirmYes" class="btn btn-success px-4">Yes</button>
+              <button id="confirmNo" class="btn btn-danger px-4">No</button>
             </div>
           </div>
-        </main>
+        </div>
       </div>
     </section>
 
-    <!-- ENTRY -->
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

@@ -9,9 +9,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const USER_FILE = path.join(__dirname, "../data/user.json");
 
-// GET PROFILE
 router.get("/", verifyToken, (req, res) => {
-  const users = readData(USER_FILE) || [];
+  const users = readData(USER_FILE);
   const user = users.find((u) => u.id === req.user.id);
 
   if (!user) return res.status(404).json({ message: "User not found" });
