@@ -103,9 +103,6 @@ app.use(
   })
 );
 
-// Handle preflight OPTIONS requests globally
-app.options("*", cors());
-
 /* -------------------- REST ROUTES -------------------- */
 app.use("/auth", authRoutes);
 app.use("/profile", profileRoutes);
