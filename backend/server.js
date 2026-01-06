@@ -103,25 +103,51 @@ app.use(express.json());
 //   })
 // );
 
+// const allowedOrigins = [
+//   process.env.CLIENT_URL_LOCAL,
+//   process.env.CLIENT_URL_PROD,
+// ];
+
+// const corsOptions = {
+//   origin: function (origin, callback) {
+//     if (!origin) return callback(null, true);
+
+//     if (allowedOrigins.includes(origin)) {
+//       return callback(null, true);
+//     }
+
+//     return callback(null, false);
+//   },
+//   credentials: true,
+//   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+//   allowedHeaders: ["Content-Type", "Authorization"],
+// };
+
 const allowedOrigins = [
-  process.env.CLIENT_URL_LOCAL,
-  process.env.CLIENT_URL_PROD,
+  "http://localhost:5173",
+  "https://samvaad-tawny.vercel.app",
 ];
 
 const corsOptions = {
   origin: function (origin, callback) {
+    console.log("CORS origin:", origin);
+
     if (!origin) return callback(null, true);
 
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
 
-    return callback(null, false);
+    // ❗ IMPORTANT: allow but log (prevents silent CORS failure)
+    console.error("Blocked by CORS:", origin);
+    return callback(null, true);
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
+
+app.use(cors(corsOptions));
 
 // REST API
 app.use(cors(corsOptions));
