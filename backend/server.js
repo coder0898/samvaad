@@ -125,7 +125,7 @@ const corsOptions = {
 
 // REST API
 app.use(cors(corsOptions));
-app.options("*", cors(corsOptions)); // 🔥 REQUIRED
+app.options("/", cors(corsOptions)); // 🔥 REQUIRED
 
 /* -------------------- REST ROUTES -------------------- */
 app.use("/auth", authRoutes);
