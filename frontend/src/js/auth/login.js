@@ -1,7 +1,7 @@
 // login.js
 import { isLoginFieldEmpty } from "./util.js";
 
-const BaseURL = `https://samvaad-r7bw.onrender.com`;
+const BaseURL = import.meta.env.VITE_BACKEND_URL;
 
 let loginErrorTimeout; // global timeout tracker
 
