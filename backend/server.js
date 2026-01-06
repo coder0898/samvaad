@@ -83,25 +83,83 @@ const app = express();
 app.use(express.json());
 
 // -------------------- CORS SETUP --------------------
+// const allowedOrigins = [
+//   process.env.CLIENT_URL_LOCAL,
+//   process.env.CLIENT_URL_PROD,
+// ];
+
+// // Global CORS middleware for REST API
+// app.use(
+//   cors({
+//     origin: function (origin, callback) {
+//       // Allow requests with no origin (like Postman)
+//       if (!origin) return callback(null, true);
+//       if (allowedOrigins.includes(origin)) return callback(null, true);
+//       return callback(new Error("Not allowed by CORS"));
+//     },
+//     // methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+//     // allowedHeaders: ["Content-Type", "Authorization"],
+//     credentials: true,
+//   })
+// );
+
+// const allowedOrigins = [
+//   process.env.CLIENT_URL_LOCAL,
+//   process.env.CLIENT_URL_PROD,
+// ];
+
+// const corsOptions = {
+//   origin: function (origin, callback) {
+//     if (!origin) return callback(null, true);
+
+//     if (allowedOrigins.includes(origin)) {
+//       return callback(null, true);
+//     }
+
+//     return callback(null, false);
+//   },
+//   credentials: true,
+//   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+//   allowedHeaders: ["Content-Type", "Authorization"],
+// };
+
 const allowedOrigins = [
-  process.env.CLIENT_URL_LOCAL,
-  process.env.CLIENT_URL_PROD,
+  "http://localhost:5173",
+  "https://samvaad-tawny.vercel.app",
 ];
 
-// Global CORS middleware for REST API
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      // Allow requests with no origin (like Postman)
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) return callback(null, true);
-      return callback(new Error("Not allowed by CORS"));
-    },
-    // methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    // allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
-  })
-);
+const corsOptions = {
+  origin: function (origin, callback) {
+    console.log("CORS origin:", origin);
+
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    // ❗ IMPORTANT: allow but log (prevents silent CORS failure)
+    console.error("Blocked by CORS:", origin);
+    return callback(null, true);
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+app.use(cors(corsOptions));
+
+// REST API
+app.use(cors(corsOptions));
+app.options("/", cors(corsOptions)); // 🔥 REQUIRED
+
+// 🔥 FORCE END OPTIONS REQUESTS
+app.use((req, res, next) => {
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
+  next();
+});
 
 /* -------------------- REST ROUTES -------------------- */
 app.use("/auth", authRoutes);
