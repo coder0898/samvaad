@@ -153,6 +153,14 @@ app.use(cors(corsOptions));
 app.use(cors(corsOptions));
 app.options("/", cors(corsOptions)); // 🔥 REQUIRED
 
+// 🔥 FORCE END OPTIONS REQUESTS
+app.use((req, res, next) => {
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
+  next();
+});
+
 /* -------------------- REST ROUTES -------------------- */
 app.use("/auth", authRoutes);
 app.use("/profile", profileRoutes);
